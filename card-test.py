@@ -15,6 +15,7 @@ FACE_PENALTY = -10 #how many points to subtract per remaining face card
 STARTING_CARDS = 4 #how many cards dealt at beginning
 ROUND_NUM = 4 #how many rounds to play
 STEAL_MIN = 2 #minimum cards
+CARDS_TO_STEAL = 2
 
 face_cards = ["Jack","Queen","King","Ace"]
 discard_pile = pydealer.Stack()
@@ -32,8 +33,6 @@ def game(players):
     for i in range(players):
         player_list.append(pydealer.Stack) #create the player's hand
         player_list[i] = deck.deal(STARTING_CARDS) #add four cards to it
-        #print(player_list[i])
-        #print()
 
     #four game rounds
     for rounds in range(ROUND_NUM):
@@ -51,16 +50,32 @@ def game(players):
                 face_index = player.find_list(face_cards) #find list of face cards in hand
 
                 #getting a card removes it from the deck! like holding it in hand
-                if(move_choice == 0):
+                if(move_choice == 0): #drawing two move
                     to_discard = player.get(face_index[0]) #this card is now gone
                     discard_pile.add(to_discard)
                     player.add(deck.deal(2)) #draw two
                     print("Player",player_num,"discarded a face and drew two")
-                else:
+                else: #stealing move
                     #check if players can be stolen from
+                    safe_steals = []
+                    for examine_player in player_list:
+                        if(examine_player.size >= STEAL_MIN):
+                            safe_steals.append(examine_player) #add the safe steal to the list
+
+
+
+                    to_steal = random.randint(0,len(safe_steals)-1) #randomly choose a player to steal from
+                    stolen_player = safe_steals[to_steal]
+
+                    card_one = random.randint(0,stolen_player.size - 1)
+                    player.add(stolen_player.get(card_one)) #take a card from stolen player and add to stealing player
+
+                    card_two = random.randint(0, stolen_player.size - 1) #run a second time, but with new size of hand
+                    player.add(stolen_player.get(card_one))
+
                     #can't steal if hand is less than STEAL_MIN
                     #if so, choose a random player to steal from
-                    print("Player",player_num,"Going to steal")
+                    print("Player",player_num,"discarded a face and stole two cards")
 
 
             player_num += 1
